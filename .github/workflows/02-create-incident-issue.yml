@@ -1,0 +1,49 @@
+name: 02 - Create Incident Issue (Simulation)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  create_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Create incident issue from sample alert JSON
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          TITLE=$(python -c "import json;print(json.load(open('docs/sample-alert-password-spray.json'))['alert_name'])")
+          BODY=$(python - <<'PY'
+          import json
+          a=json.load(open('docs/sample-alert-password-spray.json'))
+          print(f"""## Incident: {a['alert_name']}
+
+**Severity:** {a['severity']}
+**Time window:** {a['time_window']}
+**Trigger reason:** {a['trigger_reason']}
+
+### Key details
+- **Source IP:** {a['source_ip']}
+- **Targeted users:** {', '.join(a['targeted_users'])}
+- **First seen:** {a['first_seen']}
+- **Last seen:** {a['last_seen']}
+
+### Notes
+{a['notes']}
+
+### Next actions (analyst)
+- Validate if source IP is expected (VPN / known ranges)
+- Check if any targeted user had a successful login after failures
+- Consider temporary IP block / conditional access challenge
+- Document outcome and close this issue
+""")
+          PY
+          )
+          gh issue create --title "$TITLE" --body "$BODY" --label "incident,siem"
