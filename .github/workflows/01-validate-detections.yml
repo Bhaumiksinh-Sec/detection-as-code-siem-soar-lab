@@ -8,7 +8,14 @@ on:
       - "detections/**"
       - "ci/validate_sigma_yaml.py"
       - ".github/workflows/01-validate-detections.yml"
-
+      
+pull_request:
+  branches: ["main"]
+  paths:
+      - "detections/**"
+      - "ci/validate_sigma_yaml.py"
+      - ".github/workflows/01-validate-detections.yml"
+      
 permissions:
   contents: read
 
