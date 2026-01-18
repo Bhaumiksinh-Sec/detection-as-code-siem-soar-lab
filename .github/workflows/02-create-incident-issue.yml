@@ -18,32 +18,42 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -e
-          TITLE=$(python -c "import json;print(json.load(open('docs/sample-alert-password-spray.json'))['alert_name'])")
-          BODY=$(python - <<'PY'
+          python <<'PY'
           import json
-          a=json.load(open('docs/sample-alert-password-spray.json'))
-          print(f"""## Incident: {a['alert_name']}
+          import subprocess
 
-**Severity:** {a['severity']}
-**Time window:** {a['time_window']}
-**Trigger reason:** {a['trigger_reason']}
+          with open("docs/sample-alert-password-spray.json") as f:
+              a = json.load(f)
 
-### Key details
-- **Source IP:** {a['source_ip']}
-- **Targeted users:** {', '.join(a['targeted_users'])}
-- **First seen:** {a['first_seen']}
-- **Last seen:** {a['last_seen']}
+          title = a["alert_name"]
 
-### Notes
-{a['notes']}
+          body = f"""## Incident: {a['alert_name']}
 
-### Next actions (analyst)
-- Validate if source IP is expected (VPN / known ranges)
-- Check if any targeted user had a successful login after failures
-- Consider temporary IP block / conditional access challenge
-- Document outcome and close this issue
-""")
-          PY
+          **Severity:** {a['severity']}
+          **Time window:** {a['time_window']}
+          **Trigger reason:** {a['trigger_reason']}
+
+          ### Key details
+          - **Source IP:** {a['source_ip']}
+          - **Targeted users:** {', '.join(a['targeted_users'])}
+          - **First seen:** {a['first_seen']}
+          - **Last seen:** {a['last_seen']}
+
+          ### Notes
+          {a['notes']}
+
+          ### Next actions (analyst)
+          - Validate if source IP is expected (VPN / known ranges)
+          - Check if any targeted user had a successful login after failures
+          - Consider temporary IP block / conditional access challenge
+          - Document outcome and close this issue
+          """
+
+          subprocess.run(
+              ["gh", "issue", "create",
+               "--title", title,
+               "--body", body,
+               "--label", "incident,siem"],
+              check=True
           )
-          gh issue create --title "$TITLE" --body "$BODY" --label "incident,siem"
+          PY
