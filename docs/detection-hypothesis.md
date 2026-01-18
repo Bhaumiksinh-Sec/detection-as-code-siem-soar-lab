@@ -1,4 +1,4 @@
-# Detection Hypotheses
+# Detection Hypothesis
 
 ## 1. Suspicious Authentication Activity
 
