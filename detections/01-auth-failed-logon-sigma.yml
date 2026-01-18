@@ -1,0 +1,25 @@
+title: Failed Authentication Attempt (Base Signal)
+id: 7a3c2c6a-8c2f-4b32-9d73-0f0d9a2c1c01
+status: experimental
+description: >
+  Base detection signal for failed authentication attempts.
+  This rule is used as a building block for password-spray/brute-force correlation.
+author: YourName
+date: 2026/01/18
+references:
+  - https://attack.mitre.org/techniques/T1110/
+tags:
+  - attack.credential_access
+  - attack.t1110
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4625
+  condition: selection
+falsepositives:
+  - User mistypes password
+  - Password reset windows
+  - Service accounts with outdated credentials
+level: low
