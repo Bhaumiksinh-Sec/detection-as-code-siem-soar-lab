@@ -1,23 +1,13 @@
-name: 02 - Create Incident Issue (Simulation)
-
-on:
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  issues: write
-
-jobs:
-  create_issue:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
       - name: Create incident issue from sample alert JSON
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -e
+
+          # Ensure labels exist (ignore errors if they already exist)
+          gh label create incident --description "Security incident created from detection" || true
+          gh label create siem --description "SIEM alert / detection related" || true
+
           python <<'PY'
           import json
           import subprocess
